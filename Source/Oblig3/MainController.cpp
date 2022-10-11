@@ -54,22 +54,15 @@ AMainController::AMainController()
 void AMainController::BeginPlay()
 {
 	Super::BeginPlay();
-
 	SpawnNodes();
-	
 }
 
 void AMainController::SpawnNodes()
 {
-
 	if (nodes.Num() > 0)
 	{
-		for (int i = NodeAmount - 1; i < 0; i--)
-		{
-			nodes[i]->Destroy();
-		}
+		return;
 	}
-
 	nodes.Empty();
 	world = GetWorld();
 
@@ -109,6 +102,7 @@ void AMainController::SpawnNodes()
 	}
 }
 
+
 // Called every frame
 void AMainController::Tick(float DeltaTime)
 {
@@ -117,35 +111,116 @@ void AMainController::Tick(float DeltaTime)
 
 
 
+	RunDjikstra();
+
+
+}
+
+// Called to bind functionality to input
+void AMainController::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+}
+void AMainController::DeleteNodes()
+{
+	if (nodes.Num() > 0)
+	{
+		for (int i = nodes.Num() - 1; i > -1; i--)
+		{
+			nodes[i]->Kill();
+		}
+		nodes.Empty();
+		djisktraFound = false;
+		isRunningDjisktra = false;
+	}
+}
+
+void AMainController::Djisktra()
+{
+
+	#pragma region Initialize
+
+		start = FMath::RandRange(0, NodeAmount - 1);
+		// Random Start and End
+		end = FMath::RandRange(0, NodeAmount - 1);
+
+
+		while (start == end)
+		{
+			end = FMath::RandRange(0, NodeAmount - 1);
+		}
+
+		// initialize all values 
+		for (int i{}; i < NodeAmount; i++)
+		{
+			nodes[i]->totalCost = INT_MAX;
+			nodes[i]->isFound = false;
+			nodes[i]->previousNode = nullptr;
+			nodes[i]->markedAsFastestRoute = false;
+			nodes[i]->ResetMaterial();
+		}
+
+		nodes[start]->totalCost = 0;
+		nodes[start]->mesh->SetMaterial(0, startMaterial);
+		nodes[end]->mesh->SetMaterial(0, endMaterial);
+
+
+
+		currentNode = nodes[start];
+
+		// Do first checks for children of start
+		for (int i{}; i < currentNode->connectionAmount; i++)
+		{
+			APathfindNode* checkingNode = currentNode->connections[i];
+
+			if (checkingNode->GetTotalCost(currentNode) < checkingNode->totalCost)
+			{			
+				
+				int newCost = checkingNode->GetTotalCost(currentNode) + currentNode->totalCost;
+				checkingNode->SetTotalCost(newCost);
+				checkingNode->previousNode = currentNode;
+				
+			}
+			
+		}
+		currentNode->isFound = true;
+
+	#pragma endregion
+
+		isRunningDjisktra = true;
+
+}
+
+void AMainController::RunDjikstra()
+{
 	if (isRunningDjisktra)
 	{
-		int lowestIndex = 0;
-		int lowestAmount = INT_MAX;
-		// Find the closes vertex to start
-		for (int j{}; j < NodeAmount; j++)
-		{
-			if (!nodes[j]->isFound && nodes[j]->totalCost < lowestAmount)
+
+		// What current node are we changine to?
+			int lowestIndex = 0;
+			int lowestAmount = INT_MAX;
+			// Find the closes vertex to start
+			for (int j{}; j < NodeAmount; j++)
 			{
-				lowestIndex = j;
-				lowestAmount = nodes[j]->totalCost;
+				if (!nodes[j]->isFound && nodes[j]->totalCost < lowestAmount)
+				{
+					lowestIndex = j;
+					lowestAmount = nodes[j]->totalCost;
+				}
 			}
-		}
-		currentNode = nodes[lowestIndex];
+			currentNode = nodes[lowestIndex];
 
 
-		// Check children that are nor already found
+		// Check children of current node that are not already found
 		for (int j{}; j < currentNode->connectionAmount; j++)
 		{
-			if (currentNode->connections[j]->GetTotalCost(currentNode) < currentNode->connections[j]->totalCost && !currentNode->connections[j]->isFound)
-			{
-				APathfindNode* checkingNode = currentNode->connections[j];
-
-				if (checkingNode->GetTotalCost(currentNode) < checkingNode->totalCost)
-				{
-					int newCost = checkingNode->GetTotalCost(currentNode) + currentNode->totalCost;
-					checkingNode->SetTotalCost(newCost);
-					checkingNode->previousNode = currentNode;
-				}
+			APathfindNode* checkingNode = currentNode->connections[j];
+			if (checkingNode->GetTotalCost(currentNode) + currentNode->totalCost < checkingNode->totalCost && !checkingNode->isFound)
+			{		
+				int newCost = checkingNode->GetTotalCost(currentNode) + currentNode->totalCost;
+				checkingNode->SetTotalCost(newCost);
+				checkingNode->previousNode = currentNode;				
 			}
 
 		}
@@ -186,68 +261,5 @@ void AMainController::Tick(float DeltaTime)
 		}
 		djisktraFound = false;
 	}
-
-
-}
-
-// Called to bind functionality to input
-void AMainController::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
-void AMainController::Djisktra()
-{
-
-
-	#pragma region Initialize
-
-		start = 5;
-		// Random Start and End
-		end = FMath::RandRange(0, NodeAmount - 1);
-		while (start == end)
-		{
-			end = FMath::RandRange(0, NodeAmount - 1);
-		}
-
-		// initialize all values 
-		for (int i{}; i < NodeAmount; i++)
-		{
-			nodes[i]->totalCost = INT_MAX;
-			nodes[i]->isFound = false;
-			nodes[i]->previousNode = nullptr;
-		}
-
-		nodes[start]->totalCost = 0;
-		nodes[start]->mesh->SetMaterial(0, startMaterial);
-		nodes[end]->mesh->SetMaterial(0, endMaterial);
-
-
-
-		currentNode = nodes[start];
-
-		// Do first checks for children of start
-		for (int i{}; i < currentNode->connectionAmount; i++)
-		{
-			if (currentNode->connections[i]->GetTotalCost(currentNode) < currentNode->connections[i]->totalCost)
-			{
-				APathfindNode* checkingNode = currentNode->connections[i];
-
-				if (checkingNode->GetTotalCost(currentNode) < checkingNode->totalCost)
-				{
-					int newCost = checkingNode->GetTotalCost(currentNode) + currentNode->totalCost;
-					checkingNode->SetTotalCost(newCost);
-					checkingNode->previousNode = currentNode;
-				}
-			}
-			
-		}
-		currentNode->isFound = true;
-
-	#pragma endregion
-
-		isRunningDjisktra = true;
-
 }
 

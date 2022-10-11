@@ -53,6 +53,7 @@ void APathfindNode::SetupEnum(float x, float y, float z)
 	if (x > 0 && y > 0 && z > 0)
 	{
 		nodeSector = ENodeSector::UP_North_East;
+
 	}
 	if (x < 0 && y > 0 && z > 0)
 	{
@@ -84,6 +85,8 @@ void APathfindNode::SetupEnum(float x, float y, float z)
 	{
 		nodeSector = ENodeSector::DOWN_North_West;
 	}
+
+
 
 	#pragma endregion
 
@@ -308,6 +311,16 @@ void APathfindNode::NewConnection(APathfindNode* newConnection)
 
 	int newCost = (GetActorLocation() - connections[connectionAmount - 1]->GetActorLocation()).Length();
 	movementCost.Add(newCost);
+}
+
+void APathfindNode::Kill()
+{
+	this->Destroy();
+}
+
+void APathfindNode::ResetMaterial()
+{
+	mesh->SetMaterial(0, resetMaterial);
 }
 
 

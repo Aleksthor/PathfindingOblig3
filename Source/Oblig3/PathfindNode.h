@@ -8,6 +8,7 @@
 
 class UStaticMeshComponent;
 class UWorld;
+class UMaterial;
 
 UENUM(BlueprintType)
 enum class ENodeSector : uint8
@@ -77,6 +78,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	bool markedAsFastestRoute;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
+	UMaterial* resetMaterial;
 private: 
 
 	// Private Variables
@@ -109,5 +112,8 @@ public:
 
 	void NewConnection(APathfindNode* newConnection);
 	
+	void Kill();
+
+	void ResetMaterial();
 
 };
