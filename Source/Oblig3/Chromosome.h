@@ -23,6 +23,7 @@ public:
 
 	int distance;
 
+	/** Calculate the distance of route */
 	void CalculatePath();
 	
 };

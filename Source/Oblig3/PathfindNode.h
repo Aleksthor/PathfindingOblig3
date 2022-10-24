@@ -115,34 +115,93 @@ public:
 
 	void DebugLine();
 
+	/** Setup the NodeSector Enum 
+	* 
+	* @param X Location of the Node
+	* @param Y Location of the Node
+	* @param Z Location of the Node
+	* 
+	*/
 	void SetupEnum(float x, float y, float z);
 
+
+	/** Make connections to the nodes in the same sector 
+	*
+	* @param Full Array of nodes
+	*
+	*/
 	void SetConnection(TArray<APathfindNode*> fullArray);
 
+	/** Make a connections from all sectors to ehe "capital"
+	*
+	* @param Full Array of nodes
+	*
+	*/
 	void ConnectSectors(TArray<APathfindNode*> fullArray);
 
+	/** Set ID of the node
+	*
+	* @param ID as integer
+	*
+	*/
 	void SetID(int i);
 
+	/** Returns the ID of this node */
 	int GetID();
 
+	/** Returns the cost from us to parent
+	*
+	* @param parent node
+	*
+	*/
 	int GetTotalCost(APathfindNode* parent);
 
+	/** Set the Total Cost of this Node
+	*
+	* @param The cost to set
+	*
+	*/
 	void SetTotalCost(int input);
 
+	/** Create a Connection to another Node
+	*
+	* @param Node to connect to
+	*
+	*/
 	void NewConnection(APathfindNode* newConnection);
 	
+	/** Destroy this Node */
 	void Kill();
 
+	/** Reset Material to empty */
 	void ResetMaterial();
 
+	/** Returns the length from this node to end
+	*
+	* @param End node
+	*
+	*/
 	int GetDistanceToFinish(APathfindNode* finish);
 
+	/** Connect to all other nodes in the array
+	*
+	* @param Full array of all nodes
+	*
+	*/
 	void ConnectToAll(TArray<APathfindNode*> fullArray);
 
+	/** Set the phermone level to 1 for all paths */
 	void InitPhermones();
 	
+	/** Update the phermones of a path 
+	* 
+	* @param The ID of the node we're walking down
+	* @param The evaporation rate
+	* 
+	*/
 	void CalcPhermones(int ID, float evaporation);
 
+	/** Display the Lines the ant walked down */
 	void DisplayAntLines();
 
 };
