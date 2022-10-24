@@ -385,4 +385,156 @@ void APathfindNode::DisplayAntLines()
 
 }
 
+int APathfindNode::ConnectToNearestTwo(TArray<APathfindNode*> nodes)
+{
+	TArray<APathfindNode*> tempNodes = nodes;
+	// lowest is the index of the nearest Node
+	int lowest{};
+	int lowestAmount = INT_MAX;
+	for (int i{}; i < tempNodes.Num(); i++)
+	{
+		if (i != ID)
+		{
+			float dist = (tempNodes[i]->GetActorLocation() - GetActorLocation()).Length();
+			if (lowestAmount > dist)
+			{
+				lowestAmount = dist;
+				lowest = i;
+			}
+
+		}
+	}
+	// secondLowest is the index of the second nearest Node
+	int secondLowest{};
+	lowestAmount = INT_MAX;
+	for (int i{}; i < tempNodes.Num(); i++)
+	{
+		if (i != lowest && i != ID)
+		{
+			float dist = (tempNodes[i]->GetActorLocation() - GetActorLocation()).Length();
+			if (lowestAmount > dist)
+			{
+				lowestAmount = dist;
+				secondLowest = i;
+			}
+
+		}
+	}
+	nearestInsertionConnections.Add(tempNodes[lowest]);
+	nearestInsertionConnections.Add(tempNodes[secondLowest]);
+
+	tempNodes[lowest]->nearestInsertionConnections.Add(this);
+	tempNodes[lowest]->nearestInsertionConnections.Add(tempNodes[secondLowest]);
+
+	tempNodes[secondLowest]->nearestInsertionConnections.Add(this);
+	tempNodes[secondLowest]->nearestInsertionConnections.Add(tempNodes[lowest]);
+	
+	return lowest;
+}
+
+int APathfindNode::GetNearestOutsideGraph(TArray<APathfindNode*> nodes)
+{
+	TArray<APathfindNode*> tempNodes = nodes;
+	// lowest is the index of the nearest Node
+	int lowest{};
+	int lowestAmount = INT_MAX;
+	for (int i{}; i < tempNodes.Num(); i++)
+	{
+		if (tempNodes[i]->nearestInsertionConnections.Num() == 0 && i != ID)
+		{
+			float dist = (tempNodes[i]->GetActorLocation() - GetActorLocation()).Length();
+			if (lowestAmount > dist)
+			{
+				lowestAmount = dist;
+				lowest = i;
+			}
+
+		}
+	}
+
+	return tempNodes[lowest]->ID;
+}
+
+void APathfindNode::ConnectToGraph(TArray<APathfindNode*> nodes)
+{
+	TArray<APathfindNode*> tempNodes = nodes;
+	// lowest is the index of the nearest Node
+	int lowest{};
+	int lowestAmount = INT_MAX;
+	for (int i{}; i < tempNodes.Num(); i++)
+	{
+		if (tempNodes[i]->nearestInsertionConnections.Num() > 0 && i != ID)
+		{
+			float dist = (tempNodes[i]->GetActorLocation() - GetActorLocation()).Length();
+			if (lowestAmount > dist)
+			{
+				lowestAmount = dist;
+				lowest = i;
+			}
+		}
+	}
+	// secondLowest is the index of the second nearest Node
+	int secondLowest{};
+	lowestAmount = INT_MAX;
+	TArray<APathfindNode*> secondTempNodes = tempNodes[lowest]->nearestInsertionConnections;
+	for (int i{}; i < secondTempNodes.Num(); i++)
+	{
+		if (i != ID)
+		{
+			float dist = (secondTempNodes[i]->GetActorLocation() - GetActorLocation()).Length();
+			if (lowestAmount > dist)
+			{
+				lowestAmount = dist;
+				secondLowest = i;
+			}
+
+		}
+	}
+	nearestInsertionConnections.Add(tempNodes[lowest]);
+	nearestInsertionConnections.Add(secondTempNodes[secondLowest]);
+
+	tempNodes[lowest]->nearestInsertionConnections.Add(this);
+	tempNodes[lowest]->nearestInsertionConnections.Remove(secondTempNodes[secondLowest]);
+
+	secondTempNodes[secondLowest]->nearestInsertionConnections.Add(this);
+	secondTempNodes[secondLowest]->nearestInsertionConnections.Remove(tempNodes[lowest]);
+
+
+}
+
+void APathfindNode::DisplayConnections()
+{
+	if (nearestInsertionConnections.Num() > 1)
+	{
+
+	#pragma region Draw White
+		UKismetSystemLibrary::DrawDebugArrow
+		(world,									// World
+			GetActorLocation(),						// Start
+			nearestInsertionConnections[0]->GetActorLocation(),		// End
+			20.f,									// ArrowSize
+			FColor::White,							// Color
+			0.f,									// Duration
+			2.5f);									// Thickness
+
+	#pragma endregion
+
+
+	#pragma region Draw White
+		UKismetSystemLibrary::DrawDebugArrow
+		(world,									// World
+			GetActorLocation(),						// Start
+			nearestInsertionConnections[1]->GetActorLocation(),		// End
+			20.f,									// ArrowSize
+			FColor::White,							// Color
+			0.f,									// Duration
+			2.5f);									// Thickness
+
+	#pragma endregion
+	}
+
+}
+
+
+
 

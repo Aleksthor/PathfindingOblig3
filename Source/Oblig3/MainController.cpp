@@ -52,6 +52,8 @@ AMainController::AMainController()
 	geneticFound = false;
 	isRunningAntColony = false;
 	antColonyFound = false;
+	isRunningNearestInsertion = false;
+	nearestInsertionFound = false;
 }
 
 // Called when the game starts or when spawned
@@ -76,6 +78,7 @@ void AMainController::Tick(float DeltaTime)
 	RunAStar();
 	RunGeneticAlgorithm();
 	RunAntColony();
+	RunNearestinsertion();
 
 }
 
@@ -479,6 +482,8 @@ void AMainController::ResetBooleans()
 	geneticFound = false;
 	isRunningAntColony = false;
 	antColonyFound = false;
+	isRunningNearestInsertion = false;
+	nearestInsertionFound = false;
 }
 
 // Initialize Genetic Algorithm
@@ -490,6 +495,7 @@ void AMainController::GeneticAlgorithm()
 	chromosomes.Empty();
 	currentIteration = 0;
 	isRunningGenetic = true;
+	bestDistance = INT_MAX;
 
 	// Generate half of max population
 	GenerateRandomChromosomes();
@@ -509,11 +515,15 @@ void AMainController::RunGeneticAlgorithm()
 			// Make 50% of the new population from offsprings
 			for (int i{}; i < population - 1; i = i + 2)
 			{
-				UChromosome* parent1 = chromosomes[i];
-				UChromosome* parent2 = chromosomes[i + 1];
-				UChromosome* offspring = CreateOffspring(parent1, parent2);
-				offspring->CalculatePath();
-				chromosomes.Add(offspring);
+				if (chromosomes.Num() > i + 1)
+				{
+					UChromosome* parent1 = chromosomes[i];
+					UChromosome* parent2 = chromosomes[i + 1];
+					UChromosome* offspring = CreateOffspring(parent1, parent2);
+					offspring->CalculatePath();
+					chromosomes.Add(offspring);
+
+				}
 
 			}
 
@@ -521,21 +531,27 @@ void AMainController::RunGeneticAlgorithm()
 			// Make 25% of the new population from offsprings
 			for (int i{}; i < population - 1; i = i + 4)
 			{
-				UChromosome* parent1 = chromosomes[i];
-				UChromosome* parent2 = chromosomes[i + 1];
-				UChromosome* offspring = CreateOffspring(parent1, parent2);
-				offspring->CalculatePath();
-				chromosomes.Add(offspring);
+				if (chromosomes.Num() > i + 1)
+				{
+					UChromosome* parent1 = chromosomes[i];
+						UChromosome* parent2 = chromosomes[i + 1];
+						UChromosome* offspring = CreateOffspring(parent1, parent2);
+						offspring->CalculatePath();
+						chromosomes.Add(offspring);
+				}
 			}
 
 			// Generate 20 % of the new poplation from Mutations
 			for (int i{}; i < population - 1; i  = i + 5)
 			{
-				UChromosome* parent = chromosomes[FMath::RandRange(0, chromosomes.Num() - 1)];
-				UChromosome* mutated = NewObject<UChromosome>();
-				mutated->route = GetMutatedRoute(parent);
-				mutated->CalculatePath();
-				chromosomes.Add(mutated);
+				if (chromosomes.Num() > i + 1)
+				{
+					UChromosome* parent = chromosomes[FMath::RandRange(0, chromosomes.Num() - 1)];
+						UChromosome* mutated = NewObject<UChromosome>();
+						mutated->route = GetMutatedRoute(parent);
+						mutated->CalculatePath();
+						chromosomes.Add(mutated);
+				}
 			}
 
 			// Generate 5 % random Chromosomes to the population
@@ -1022,13 +1038,77 @@ void AMainController::ConnectStart()
 
 }
 
-
+// Intialize Nearest Insertion
 void AMainController::NearestInsertion()
 {
+	ResetBooleans();
+	for (int i{}; i < NodeAmount; i++)
+	{
+		nodes[i]->nearestInsertionConnections.Empty();
+	}
+	currentNode = nodes[0];
+
+	int nearest = currentNode->ConnectToNearestTwo(nodes);
+
+	currentNode = nodes[nearest];
+
+	isRunningNearestInsertion = true;
+	currentIteration = 0;
 
 }
 
 void AMainController::RunNearestinsertion()
 {
+	if (isRunningNearestInsertion && currentIteration < maxIterationsAllowed)
+	{
+		currentIteration++;
+		int nearest = currentNode->GetNearestOutsideGraph(nodes);
+		currentNode = nodes[nearest];
+		UE_LOG(LogTemp, Warning, TEXT("%d"), nearest);
+		UE_LOG(LogTemp, Warning, TEXT("%d"), currentNode->ID);
+
+
+		currentNode->ConnectToGraph(nodes);
+
+		bool weDone = true;
+		for (int i{}; i < NodeAmount; i++)
+		{
+			if (nodes[i]->nearestInsertionConnections.Num() == 0)
+			{
+				weDone = false;
+			}
+			nodes[i]->DisplayConnections();
+		}
+
+		if (weDone)
+		{
+			isRunningNearestInsertion = false;
+			nearestInsertionFound = true;
+		}
+	}
+	if (nearestInsertionFound || currentIteration == maxIterationsAllowed && nodes.Num() > 0)
+	{
+		for (int i{}; i < NodeAmount; i++)
+		{
+			nodes[i]->DisplayConnections();
+		}
+	}
+
+	bestInsertionRoute = 0;
+	if (nearestInsertionFound && nodes.Num() > 0)
+	{
+		for (int i{}; i < NodeAmount; i++)
+		{
+			if (previousNode != nodes[i]->nearestInsertionConnections[0])
+			{
+				bestInsertionRoute += (nodes[i]->GetActorLocation() - nodes[i]->nearestInsertionConnections[0]->GetActorLocation()).Length() / 50.f;
+			}
+			else
+			{
+				bestInsertionRoute += (nodes[i]->GetActorLocation() - nodes[i]->nearestInsertionConnections[1]->GetActorLocation()).Length() / 50.f;
+			}
+			previousNode = nodes[i];
+		}
+	}
 
 }

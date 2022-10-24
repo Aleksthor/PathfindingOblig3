@@ -119,6 +119,8 @@ public:
 	bool isRunningGenetic;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
 	bool isRunningAntColony;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool isRunningNearestInsertion;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
 	bool isRunningAStar;
@@ -128,7 +130,8 @@ public:
 	bool geneticFound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
 	bool antColonyFound;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool nearestInsertionFound;
 
 
 	/** Ant Colony */
@@ -155,14 +158,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ant Colony")
 	int bestAntRoute;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Insertion")
+	int bestInsertionRoute;
+
+	// the currentNode is a pointer to the node we're currently using
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Nodes")
+	APathfindNode* currentNode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Insertion")
+	int maxIterationsAllowed;
 
 private:
 
-	// the currentNode is a pointer to the node we're currently using
-	APathfindNode* currentNode;
 
 	TArray<APathfindNode*> tempArray;
-
+	APathfindNode* previousNode;
 
 protected:
 	// Called when the game starts or when spawned

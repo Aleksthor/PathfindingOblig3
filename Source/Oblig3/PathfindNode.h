@@ -93,12 +93,10 @@ public:
 
 	float randomValue;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
-	APathfindNode* Connection1;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
-	APathfindNode* Connection2;
-
+	TArray<APathfindNode*> nearestInsertionConnections;
 private: 
 
 	// Private Variables
@@ -204,4 +202,33 @@ public:
 	/** Display the Lines the ant walked down */
 	void DisplayAntLines();
 
+	/** Returns the index of the nearest Node & Connects to two nodes
+	* 
+	* @param Full Array of all nodes
+	*
+	*/
+	int ConnectToNearestTwo(TArray<APathfindNode*> nodes);
+
+	/** Returns the index of the nearest Node
+	*
+	* @param Full Array of all nodes
+	*
+	*/
+	int GetNearestOutsideGraph(TArray<APathfindNode*> nodes);
+
+	/** Connects To two nodes already in graph
+	*
+	* @param Full Array of all nodes
+	*
+	*/
+	void ConnectToGraph(TArray<APathfindNode*> nodes);
+
+
+	/** Display Connections */
+	void DisplayConnections();
+
+
+	APathfindNode* GetConnection1();
+
+	APathfindNode* GetConnection2();
 };
