@@ -164,6 +164,7 @@ void AMainController::SpawnTSPNodes()
 
 
 		}
+		// Connect to all nodes except yourself
 		for (int i{}; i < NodeAmount; i++)
 		{
 			nodes[i]->ConnectToAll(nodes);
@@ -173,6 +174,7 @@ void AMainController::SpawnTSPNodes()
 	}
 }
 
+// Delete all Nodes
 void AMainController::DeleteNodes()
 {
 	if (nodes.Num() > 0)
@@ -190,6 +192,7 @@ void AMainController::DeleteNodes()
 	ResetBooleans();
 }
 
+// Initialize Djikstra
 void AMainController::Djisktra()
 {
 
@@ -210,7 +213,7 @@ void AMainController::Djisktra()
 			end = FMath::RandRange(0, NodeAmount - 1);
 		}
 
-		// initialize all values 
+		// Initialize all values 
 		for (int i{}; i < NodeAmount; i++)
 		{
 			nodes[i]->totalCost = INT_MAX;
@@ -220,15 +223,13 @@ void AMainController::Djisktra()
 			nodes[i]->ResetMaterial();
 		}
 
+		// Initialize Start
 		nodes[start]->totalCost = 0;
 		nodes[start]->mesh->SetMaterial(0, startMaterial);
 		nodes[end]->mesh->SetMaterial(0, endMaterial);
-
-
-
 		currentNode = nodes[start];
 
-		// Do first checks for children of start
+		// Check all children of currentNode
 		for (int i{}; i < currentNode->connectionAmount; i++)
 		{
 			APathfindNode* checkingNode = currentNode->connections[i];
@@ -259,7 +260,7 @@ void AMainController::RunDjikstra()
 		// What current node are we changing to?
 		int lowestIndex = 0;
 		int lowestAmount = INT_MAX;
-		// Find the closes vertex to start
+		// Find the closest vertex to start
 		for (int j{}; j < NodeAmount; j++)
 		{
 			if (!nodes[j]->isFound && nodes[j]->totalCost < lowestAmount)
@@ -271,7 +272,7 @@ void AMainController::RunDjikstra()
 		currentNode = nodes[lowestIndex];
 
 
-		// Check children of current node that are not already found
+		// Check all children of currentNode
 		for (int j{}; j < currentNode->connectionAmount; j++)
 		{
 			APathfindNode* checkingNode = currentNode->connections[j];
@@ -287,7 +288,7 @@ void AMainController::RunDjikstra()
 
 
 
-
+		// Check if we are done
 		isRunningDjisktra = false;
 		djisktraFound = true;
 		for (int i{}; i < NodeAmount; i++)
@@ -300,6 +301,7 @@ void AMainController::RunDjikstra()
 		}
 	}
 
+	// Tell nodes to Display according to the results of the Algorithm
 	if (djisktraFound)
 	{
 		currentNode = nodes[end];
@@ -324,7 +326,7 @@ void AMainController::RunDjikstra()
 
 
 
-
+// Initialize A* Algorithm
 void AMainController::AStar()
 {
 	
@@ -352,15 +354,13 @@ void AMainController::AStar()
 		nodes[i]->ResetMaterial();
 	}
 
+	// inistialize Start
 	nodes[start]->totalCost = 0;
 	nodes[start]->mesh->SetMaterial(0, startMaterial);
 	nodes[end]->mesh->SetMaterial(0, endMaterial);
-
-
-
 	currentNode = nodes[start];
 
-	// Do first checks for children of start
+	// Check all children of currentNode
 	for (int i{}; i < currentNode->connectionAmount; i++)
 	{
 		APathfindNode* checkingNode = currentNode->connections[i];
@@ -403,7 +403,7 @@ void AMainController::RunAStar()
 		currentNode = nodes[lowestIndex];
 
 
-		// Check children
+		// Check all children of currentNode
 		for (int i{}; i < currentNode->connectionAmount; i++)
 		{
 			APathfindNode* checkingNode = currentNode->connections[i];
@@ -422,7 +422,7 @@ void AMainController::RunAStar()
 		currentNode->isFound = true;
 
 
-
+		// Check all children of currentNode
 		isRunningAStar = false;
 		AStarFound = true;
 		for (int i{}; i < NodeAmount; i++)
@@ -439,7 +439,7 @@ void AMainController::RunAStar()
 		}
 
 
-
+		// Update nodes to display the results
 		if (AStarFound)
 		{
 			currentNode = nodes[end];
@@ -468,6 +468,7 @@ void AMainController::RunAStar()
 
 }
 
+// reset the functions
 void AMainController::ResetBooleans()
 {
 	isRunningAStar = false;
@@ -480,8 +481,7 @@ void AMainController::ResetBooleans()
 	antColonyFound = false;
 }
 
-// Genetic Algorithm
-
+// Initialize Genetic Algorithm
 void AMainController::GeneticAlgorithm()
 {
 
@@ -490,6 +490,8 @@ void AMainController::GeneticAlgorithm()
 	chromosomes.Empty();
 	currentIteration = 0;
 	isRunningGenetic = true;
+
+	// Generate half of max population
 	GenerateRandomChromosomes();
 	
 	
@@ -504,8 +506,8 @@ void AMainController::RunGeneticAlgorithm()
 		if (currentIteration < iterations)
 		{
 
-			// 
-			for (int i{}; i < population/4.f; i = i + 2)
+			// Make 50% of the new population from offsprings
+			for (int i{}; i < population - 1; i = i + 2)
 			{
 				UChromosome* parent1 = chromosomes[i];
 				UChromosome* parent2 = chromosomes[i + 1];
@@ -516,8 +518,8 @@ void AMainController::RunGeneticAlgorithm()
 			}
 
 
-			// 
-			for (int i = population / 8.f; i < population / 4.f; i = i + 4)
+			// Make 25% of the new population from offsprings
+			for (int i{}; i < population - 1; i = i + 4)
 			{
 				UChromosome* parent1 = chromosomes[i];
 				UChromosome* parent2 = chromosomes[i + 1];
@@ -526,8 +528,8 @@ void AMainController::RunGeneticAlgorithm()
 				chromosomes.Add(offspring);
 			}
 
-			// 
-			for (int i{}; i < population / 7.f; i++)
+			// Generate 20 % of the new poplation from Mutations
+			for (int i{}; i < population - 1; i  = i + 5)
 			{
 				UChromosome* parent = chromosomes[FMath::RandRange(0, chromosomes.Num() - 1)];
 				UChromosome* mutated = NewObject<UChromosome>();
@@ -536,12 +538,13 @@ void AMainController::RunGeneticAlgorithm()
 				chromosomes.Add(mutated);
 			}
 
-			CreateFourRandomChromosomes();
+			// Generate 5 % random Chromosomes to the population
+			Create5PercentNewChromosomes();
 			
-
+			// Remove the worst half of the poplation
 			GetBestChromosomes();
 
-
+			// Display the currently fastest route
 			DisplayFastest();
 			currentIteration++;
 		}
@@ -553,7 +556,7 @@ void AMainController::RunGeneticAlgorithm()
 		}
 
 	}
-
+	// Display the best route found in the search
 	if (geneticFound)
 	{
 		DisplayFastest();
@@ -564,34 +567,38 @@ void AMainController::RunGeneticAlgorithm()
 
 void AMainController::GenerateRandomChromosomes()
 {
+	// Generate half of max population
 	for (int i{}; i < population / 2; i++)
 	{
-		TArray<APathfindNode*> newChromosome;
+		
+		TArray<APathfindNode*> newRoute;
+
+		// Add a random value to all nodes
 		for (int j{}; j < NodeAmount; j++)
 		{
 			nodes[j]->randomValue = FMath::RandRange(0, 10);
-			newChromosome.Add(nodes[j]);
+			newRoute.Add(nodes[j]);
 			
 		}
 
-
-		for (int k{}; k < newChromosome.Num(); k++)
+		// Sort Array based on random value 
+		for (int k{}; k < newRoute.Num(); k++)
 		{
 			int minIndex = k;
-			for (int j{}; j < newChromosome.Num(); j++)
+			for (int j{}; j < newRoute.Num(); j++)
 			{
-				if (newChromosome[j]->randomValue < newChromosome[minIndex]->randomValue)
+				if (newRoute[j]->randomValue < newRoute[minIndex]->randomValue)
 				{
 					minIndex = j;
 				}
 
-				newChromosome.SwapMemory(minIndex, k);
+				newRoute.SwapMemory(minIndex, k);
 			}
 		}
 
-
+		// Instantiate a chromosome and add the path to it
 		UChromosome* chromosome = NewObject<UChromosome>();
-		chromosome->route = newChromosome;
+		chromosome->route = newRoute;
 		chromosome->CalculatePath();
 		chromosomes.Add(chromosome);
 
@@ -611,33 +618,38 @@ void AMainController::GenerateRandomChromosomes()
 }
 
 
-void AMainController::CreateFourRandomChromosomes()
+void AMainController::Create5PercentNewChromosomes()
 {
-	for (int i{}; i < population / 25.f; i++)
+
+	for (int i{}; i < population; i = i + 20)
 	{
-		TArray<APathfindNode*> newChromosome;
+		TArray<APathfindNode*> newRoute;
+		// Generate a random value for all nodes
 		for (int j{}; j < NodeAmount; j++)
 		{
 			nodes[j]->randomValue = FMath::RandRange(0, 10);
-			newChromosome.Add(nodes[j]);
+			newRoute.Add(nodes[j]);
 
 		}
-		for (int k{}; k < newChromosome.Num(); k++)
+
+		// Sort Array based on this random value
+		for (int k{}; k < newRoute.Num(); k++)
 		{
 			int minIndex = k;
-			for (int j{}; j < newChromosome.Num(); j++)
+			for (int j{}; j < newRoute.Num(); j++)
 			{
-				if (newChromosome[j]->randomValue < newChromosome[minIndex]->randomValue)
+				if (newRoute[j]->randomValue < newRoute[minIndex]->randomValue)
 				{
 					minIndex = j;
 				}
 
-				newChromosome.SwapMemory(minIndex, k);
+				newRoute.SwapMemory(minIndex, k);
 			}
 		}
 
+		// Instantiate this new Chromosome
 		UChromosome* chromosome = NewObject<UChromosome>();
-		chromosome->route = newChromosome;
+		chromosome->route = newRoute;
 		chromosome->CalculatePath();
 		chromosomes.Add(chromosome);
 	}
@@ -646,21 +658,30 @@ void AMainController::CreateFourRandomChromosomes()
 
 UChromosome* AMainController::CreateOffspring(UChromosome* parent1, UChromosome* parent2)
 {
+	// the object we will return gets created
 	UChromosome* offspring = NewObject<UChromosome>();
 
+	// Save array in local variable so we dont access pointer too much
 	TArray<APathfindNode*> parentArray = parent1->route;
 
-	int startPos = FMath::RandRange(0, NodeAmount / 2);
+	// Start pos is where we will "split" the chromosome
+	int startPos = FMath::RandRange(0, NodeAmount / 2 - 1);
+
 
 	TArray<APathfindNode*> tempNodes;
-	for (int i{}; i < NodeAmount / 2; i++)
+
+	// Add the genomes from the chromosome to a tempArray
+	int size = FMath::RandRange(NodeAmount / 5, NodeAmount / 2);
+	for (int i{}; i < size; i++)
 	{
 		tempNodes.Add(parentArray[startPos + i]);
 	}
 	
+
+	// Save array of parent 2 in local variable to we dont access pointer too much
 	parentArray = parent2->route;
 
-
+	// Shuffle the genomes from parent1 into parent2's chromosome
 	for (int i{}; i < tempNodes.Num(); i++)
 	{
 		parentArray.Remove(tempNodes[i]);
@@ -670,9 +691,8 @@ UChromosome* AMainController::CreateOffspring(UChromosome* parent1, UChromosome*
 		parentArray.Add(tempNodes[i]);
 	}
 
-
+	// return the offsprint chromosome
 	offspring->route = parentArray;
-
 	return offspring;
 }
 
@@ -682,9 +702,9 @@ TArray<APathfindNode*> AMainController::GetMutatedRoute(UChromosome* parent)
 
 	int startPos = FMath::RandRange(0, NodeAmount / 2);
 
-	for (int i = startPos; i < (NodeAmount / 2) + startPos; i++)
+	for (int i = startPos; i < (NodeAmount / 2) + startPos - 1; i++)
 	{
-		int a = FMath::RandRange(startPos, (NodeAmount / 2) + startPos);
+		int a = FMath::RandRange(startPos, (NodeAmount / 2) + startPos - 1);
 		if (i != a)
 		{
 			temp.Swap(a, i);

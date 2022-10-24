@@ -351,6 +351,7 @@ void APathfindNode::ConnectToAll(TArray<APathfindNode*> fullArray)
 
 void APathfindNode::InitPhermones()
 {
+	phermones.Empty();
 	for (int i{}; i < connectionAmount; i++)
 	{
 		phermones.Add(1);

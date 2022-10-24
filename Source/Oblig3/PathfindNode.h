@@ -98,6 +98,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	APathfindNode* Connection2;
+
 private: 
 
 	// Private Variables
