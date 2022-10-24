@@ -14,6 +14,9 @@ class APathfindNode;
 class UWorld;
 class USpringArmComponent;
 class UMaterial;
+class UChromosome;
+
+
 
 UCLASS()
 class OBLIG3_API AMainController : public APawn
@@ -69,11 +72,68 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Djikstra")
 	int end;
 
-private:
+	/** Genetic Algorithm */
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genetic")
+	int population;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genetic")
+	int iterations;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genetic")
+	int currentIteration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genetic")
+	TArray<UChromosome*> chromosomes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Genetic")
+	UChromosome* bestRoute;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distance")
+	int bestDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
 	bool isRunningDjisktra;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
 	bool djisktraFound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool isRunningGenetic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool isRunningAntColony;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool isRunningAStar;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool AStarFound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool geneticFound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Booleans")
+	bool antColonyFound;
+
+	/** Ant Colony */
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ant Colony")
+	float evaporation;
+
+	TArray<double> probabilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ant Colony")
+	TArray<int> pathID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ant Colony")
+	TArray<int> bestPathID;
+
+	float nevner;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ant Colony")
+	int bestAntRoute;
+
+
+private:
+
 
 	APathfindNode* currentNode;
+	TArray<APathfindNode*> tempArray;
 
 
 protected:
@@ -88,6 +148,28 @@ public:
 
 	void RunDjikstra();
 
+	void RunAStar();
+
+	void RunGeneticAlgorithm();
+
+	void GenerateRandomChromosomes();
+
+	void CreateFourRandomChromosomes();
+
+	void GetBestChromosomes();
+
+	UFUNCTION(BlueprintCallable)
+	void StopGenetic();
+
+	void DisplayFastest();
+
+	void RunAntColony();
+
+	void ConnectStart();
+
+	UChromosome* CreateOffspring(UChromosome* parent1, UChromosome* parent2);
+
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -99,6 +181,28 @@ public:
 	void SpawnNodes();
 
 	UFUNCTION(BlueprintCallable)
+	void SpawnTSPNodes();
+
+	UFUNCTION(BlueprintCallable)
 	void DeleteNodes();
+
+	UFUNCTION(BlueprintCallable)
+	void AStar();
+
+	UFUNCTION(BlueprintCallable)
+	void GeneticAlgorithm();
+
+	UFUNCTION(BlueprintCallable)
+	void AntColony();
+	
+
+	UFUNCTION(BlueprintCallable)
+	void NearestInsertion();
+
+	void RunNearestinsertion();
+
+	void ResetBooleans();
+
+	TArray<APathfindNode*> GetMutatedRoute(UChromosome* parent);
 
 };

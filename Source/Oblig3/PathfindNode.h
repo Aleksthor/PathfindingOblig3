@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UWorld;
 class UMaterial;
 
+
 UENUM(BlueprintType)
 enum class ENodeSector : uint8
 {
@@ -53,6 +54,9 @@ public:
 	int totalCost;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
+	int costToFinish;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	int timeToFinish;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
@@ -60,6 +64,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	TArray<APathfindNode*> connections;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
+	TArray<float> phermones;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	TArray<int> movementCost;
@@ -80,6 +88,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
 	UMaterial* resetMaterial;
+
+	bool displayLines = true;
+
+	float randomValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
+	APathfindNode* Connection1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NodeVariables")
+	APathfindNode* Connection2;
 private: 
 
 	// Private Variables
@@ -115,5 +133,15 @@ public:
 	void Kill();
 
 	void ResetMaterial();
+
+	int GetDistanceToFinish(APathfindNode* finish);
+
+	void ConnectToAll(TArray<APathfindNode*> fullArray);
+
+	void InitPhermones();
+	
+	void CalcPhermones(int ID, float evaporation);
+
+	void DisplayAntLines();
 
 };

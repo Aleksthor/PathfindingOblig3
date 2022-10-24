@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/World.h"
 
+
 // Sets default values
 APathfindNode::APathfindNode()
 {
@@ -37,7 +38,11 @@ void APathfindNode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DebugLine();
+	if (displayLines)
+	{
+		DebugLine();
+	}
+
 
 	
 
@@ -310,7 +315,7 @@ void APathfindNode::NewConnection(APathfindNode* newConnection)
 	connectionAmount++;
 
 	int newCost = (GetActorLocation() - connections[connectionAmount - 1]->GetActorLocation()).Length();
-	movementCost.Add(newCost);
+	movementCost.Add(newCost / 50.f);
 }
 
 void APathfindNode::Kill()
@@ -321,6 +326,62 @@ void APathfindNode::Kill()
 void APathfindNode::ResetMaterial()
 {
 	mesh->SetMaterial(0, resetMaterial);
+}
+
+int APathfindNode::GetDistanceToFinish(APathfindNode* finish)
+{
+	return (GetActorLocation() - finish->GetActorLocation()).Length() / 50.f;
+}
+
+void APathfindNode::ConnectToAll(TArray<APathfindNode*> fullArray)
+{
+	for (int i{}; i < fullArray.Num(); i++)
+	{
+		if (fullArray[i]->ID != ID)
+		{
+			connections.Add(fullArray[i]);
+			connectionAmount++;
+
+			int newCost = (GetActorLocation() - connections[connectionAmount - 1]->GetActorLocation()).Length();
+			movementCost.Add(newCost / 50.f);
+		}
+	}
+
+}
+
+void APathfindNode::InitPhermones()
+{
+	for (int i{}; i < connectionAmount; i++)
+	{
+		phermones.Add(1);
+	}
+
+}
+
+void APathfindNode::CalcPhermones(int id, float evaporation)
+{
+	for (int i{}; i < connectionAmount; i++)
+	{
+		if (connections[i]->ID == id)
+		{
+
+			float cost = (float)movementCost[i];
+			float add = (1 / cost);
+
+			phermones[i] = (phermones[i] * (1 - evaporation)) + add;
+
+		}
+	}
+
+}
+
+void APathfindNode::DisplayAntLines()
+{
+
+
+
+
+
 }
 
 
