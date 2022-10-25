@@ -168,6 +168,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Insertion")
 	int maxIterationsAllowed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Insertion")
+	bool slowDownInsertion;
+
+	float iterationFloat;
 private:
 
 
@@ -273,7 +277,7 @@ public:
 	void NearestInsertion();
 
 	/** Tick Function that runs the Nearest Insertion Algorithm */
-	void RunNearestinsertion();
+	void RunNearestinsertion(float deltaTime);
 
 	/** Reset Tick Booleans to false */
 	void ResetBooleans();

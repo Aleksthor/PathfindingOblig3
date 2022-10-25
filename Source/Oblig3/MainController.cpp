@@ -54,6 +54,8 @@ AMainController::AMainController()
 	antColonyFound = false;
 	isRunningNearestInsertion = false;
 	nearestInsertionFound = false;
+
+	slowDownInsertion = false;
 }
 
 // Called when the game starts or when spawned
@@ -78,7 +80,7 @@ void AMainController::Tick(float DeltaTime)
 	RunAStar();
 	RunGeneticAlgorithm();
 	RunAntColony();
-	RunNearestinsertion();
+	RunNearestinsertion(DeltaTime);
 
 }
 
@@ -1054,18 +1056,26 @@ void AMainController::NearestInsertion()
 
 	isRunningNearestInsertion = true;
 	currentIteration = 0;
-
+	iterationFloat = 0.f;
 }
 
-void AMainController::RunNearestinsertion()
+void AMainController::RunNearestinsertion(float deltaTime)
 {
+
+	if (isRunningNearestInsertion)
+	{
+		iterationFloat += deltaTime;
+		UE_LOG(LogTemp, Warning, TEXT("%f"), iterationFloat);
+		if (slowDownInsertion)
+		{
+			maxIterationsAllowed = iterationFloat;
+		}
+	}
 	if (isRunningNearestInsertion && currentIteration < maxIterationsAllowed)
 	{
 		currentIteration++;
 		int nearest = currentNode->GetNearestOutsideGraph(nodes);
 		currentNode = nodes[nearest];
-		UE_LOG(LogTemp, Warning, TEXT("%d"), nearest);
-		UE_LOG(LogTemp, Warning, TEXT("%d"), currentNode->ID);
 
 
 		currentNode->ConnectToGraph(nodes);
