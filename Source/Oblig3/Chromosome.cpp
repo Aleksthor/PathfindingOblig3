@@ -6,17 +6,18 @@
 
 void UChromosome::CalculatePath()
 {
-	int dist{};
+	float dist{};
 
 	for (int i{}; i < route.Num() - 1; i++)
 	{
 		if (i == 0)
 		{
-			dist += route[route.Num()-1]->GetDistanceTo(route[i]) / 50.f;
+			dist += (route[route.Num()-1]->GetActorLocation() - route[0]->GetActorLocation()).Length() / 50.f;
+			dist += (route[i]->GetActorLocation() - route[i + 1]->GetActorLocation()).Length() / 50.f;
 		}
 		else
 		{
-			dist += route[i]->GetDistanceTo(route[i + 1]) / 50.f;
+			dist += (route[i]->GetActorLocation() - route[i + 1]->GetActorLocation()).Length() / 50.f;
 		}
 		distance = dist;
 	}

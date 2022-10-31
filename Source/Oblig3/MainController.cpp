@@ -239,7 +239,7 @@ void AMainController::Djisktra()
 		{
 			APathfindNode* checkingNode = currentNode->connections[i];
 
-			if (checkingNode->GetTotalCost(currentNode) < checkingNode->totalCost)
+			if (checkingNode->GetTotalCost(currentNode) + currentNode->totalCost < checkingNode->totalCost)
 			{			
 				
 				int newCost = checkingNode->GetTotalCost(currentNode) + currentNode->totalCost;
@@ -529,17 +529,16 @@ void AMainController::RunGeneticAlgorithm()
 
 			}
 
-
 			// Make 25% of the new population from offsprings
 			for (int i{}; i < population - 1; i = i + 4)
 			{
 				if (chromosomes.Num() > i + 1)
 				{
 					UChromosome* parent1 = chromosomes[i];
-						UChromosome* parent2 = chromosomes[i + 1];
-						UChromosome* offspring = CreateOffspring(parent1, parent2);
-						offspring->CalculatePath();
-						chromosomes.Add(offspring);
+					UChromosome* parent2 = chromosomes[i + 1];
+					UChromosome* offspring = CreateOffspring(parent1, parent2);
+					offspring->CalculatePath();
+					chromosomes.Add(offspring);
 				}
 			}
 
@@ -549,10 +548,10 @@ void AMainController::RunGeneticAlgorithm()
 				if (chromosomes.Num() > i + 1)
 				{
 					UChromosome* parent = chromosomes[FMath::RandRange(0, chromosomes.Num() - 1)];
-						UChromosome* mutated = NewObject<UChromosome>();
-						mutated->route = GetMutatedRoute(parent);
-						mutated->CalculatePath();
-						chromosomes.Add(mutated);
+					UChromosome* mutated = NewObject<UChromosome>();
+					mutated->route = GetMutatedRoute(parent);
+					mutated->CalculatePath();
+					chromosomes.Add(mutated);
 				}
 			}
 
@@ -1035,7 +1034,9 @@ void AMainController::ConnectStart()
 		5);										// Thickness
 
 
-	currentNode = nodes[0];
+	int random = FMath::RandRange(0, NodeAmount - 1);
+
+	currentNode = nodes[random];
 	currentIteration++;
 
 }
